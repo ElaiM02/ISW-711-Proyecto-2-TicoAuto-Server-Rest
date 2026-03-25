@@ -5,7 +5,6 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const express = require('express');
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const mongoose = require('mongoose');
 
 const { generateToken, authenticateToken } = require('./controller/controllerAuth');
@@ -26,13 +25,10 @@ database.once('connected', () => {
 const app = express();
 
 //middlewares
-app.use(bodyParser.json());
-app.use(cors({
-    origin: '*',
-    methods: '*'
-}));
-
- app.use('/upload', express.static('upload'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: '*', methods: '*' }));
+app.use('/uploads', express.static('uploads'));
   
 //auth route
 app.post('/auth/token', generateToken);
