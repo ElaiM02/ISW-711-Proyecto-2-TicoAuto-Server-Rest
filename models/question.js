@@ -21,8 +21,7 @@ const questionSchema = new mongoose.Schema({
         ref: 'Answer',
         default: null
     }
-
-    }, {
+}, {
         timestamps: true
 });
 

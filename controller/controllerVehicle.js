@@ -15,7 +15,6 @@ const createVehicle = async (req, res) => {
     const vehicle = await Vehicle.create(vehicleData);
 
     res.status(201).json({
-      message: "Vehículo creado",
       data: vehicle
     });
 
@@ -82,7 +81,7 @@ const getVehicleById = async (req, res) => {
       .populate('owner', 'name');
 
     if (!vehicle) {
-      return res.status(404).json({ message: "Vehículo no encontrado" });
+      return res.status(404).json();
     }
 
     res.json(vehicle);
@@ -94,14 +93,22 @@ const getVehicleById = async (req, res) => {
 
 const updateVehicle = async (req, res) => {
   try {
+    const vehicle = await Vehicle.findById(req.params.id);
 
-    const vehicle = await Vehicle.findByIdAndUpdate(
+    if (!vehicle) return res.status(404).json();
+
+    const userId = req.user.id || req.user._id.toString();
+    if (vehicle.owner.toString() !== userId) {
+      return res.status(403).json();
+    }
+
+    const updated = await Vehicle.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
 
-    res.status(200).json(vehicle);
+    res.status(200).json(updated);
 
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -110,9 +117,16 @@ const updateVehicle = async (req, res) => {
 
 const deleteVehicle = async (req, res) => {
   try {
+    const vehicle = await Vehicle.findById(req.params.id);
+
+    if (!vehicle) return res.status(404).json();
+
+    const userId = req.user.id || req.user._id.toString();
+    if (vehicle.owner.toString() !== userId) {
+      return res.status(403).json();
+    }
 
     await Vehicle.findByIdAndDelete(req.params.id);
-
     res.status(204).send();
 
   } catch (error) {

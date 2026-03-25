@@ -10,17 +10,17 @@ const createQuestion = async (req, res) => {
         const userId = req.user.id || req.user.userId;
 
         if (!question) {
-            return res.status(400).json({ message: error.message });
+            return res.status(400).json();
         }
 
         if (!mongoose.Types.ObjectId.isValid(vehicleId)) {
-            return res.status(400).json({ message: error.message });
+            return res.status(400).json();
         }
 
         const vehicle = await Vehicle.findById(vehicleId);
 
         if (!vehicle) {
-            return res.status(404).json({ message: error.message });
+            return res.status(404).json();
         }
 
         const existingQuestion = await Question.findOne({ 
@@ -30,18 +30,18 @@ const createQuestion = async (req, res) => {
         });
 
         if (existingQuestion) {
-            return res.status(400).json({ message: "Ya has hecho una pregunta sin respuesta para este vehículo" });
+            return res.status(400).json();
         }
 
         const newQuestion = await Question.create({
             vehicle: vehicleId,
             user: userId,
             question
-        });;
+        });
 
-        res.status(201).json({ message: "Pregunta creada exitosamente", data: newQuestion });
+        res.status(201).json({ data: newQuestion });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json();
     }
 };
 
@@ -50,13 +50,13 @@ const getQuestionsByVehicle = async (req, res) => {
     const { vehicleId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(vehicleId)) {
-      return res.status(400).json({ message: "ID inválido" });
+      return res.status(400).json();
     }
 
     const vehicle = await Vehicle.findById(vehicleId);
 
     if (!vehicle) {
-      return res.status(404).json({ message: "Vehículo no encontrado" });
+      return res.status(404).json();
     }
 
     const userId = req.user.id || req.user.userId;
@@ -91,7 +91,7 @@ const getQuestionsByVehicle = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json();
   }
 };
 

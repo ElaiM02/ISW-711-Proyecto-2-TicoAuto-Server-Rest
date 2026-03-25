@@ -1,4 +1,3 @@
-const e = require('express');
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 
@@ -24,11 +23,9 @@ const userPost = async (req, res) => {
             password: hashedPassword
         });
 
-        await newUser.save();
-
-        res.status(201).json();
         res.header('Location', `/users/${newUser._id}`);
-        return res.json();
+        
+        return res.status(201).json();
     } catch (error) {
         return res.status(500).json();
     }
