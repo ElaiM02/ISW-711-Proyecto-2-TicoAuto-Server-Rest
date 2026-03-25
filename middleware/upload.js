@@ -4,14 +4,13 @@ const path = require("path");
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "upload/"); // carpeta donde se guardan las imágenes
+        cb(null, "uploads/");
     },
     filename: (req, file, cb) => {
         cb(null, Date.now() + path.extname(file.originalname));
     }
 });
 
-// FILTRO PARA SOLO IMÁGENES
 const fileFilter = (req, file, cb) => {
     if (
         file.mimetype === "image/jpeg" ||
