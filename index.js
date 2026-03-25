@@ -39,3 +39,10 @@ app.use('/api', require('./route/routerVehicle'));
 
 //start the app
 app.listen(3008, () => console.log('UTN API service listening on port 3008!'));
+
+app.use((err, req, res, next) => {
+    if (err) {
+        return res.status(400).json({ message: err.message });
+    }
+    next();
+});

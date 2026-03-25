@@ -12,8 +12,9 @@ const upload = require('../middleware/upload');
 // RUTAS
 router.get('/vehicle', vehicleController.getVehicles);
 
+router.get('/vehicle/me', authenticateToken, vehicleController.getMyVehicles);
 router.get('/vehicle/:id', vehicleController.getVehicleById);
-router.patch('/vehicle/:id', authenticateToken, vehicleController.updateVehicle);
+router.patch('/vehicle/:id', authenticateToken, upload.single('image'), vehicleController.updateVehicle);
 router.delete('/vehicle/:id', authenticateToken, vehicleController.deleteVehicle);
 
 router.post('/vehicle', authenticateToken, upload.single('image'), vehicleController.createVehicle);

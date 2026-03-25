@@ -91,6 +91,23 @@ const getVehicleById = async (req, res) => {
   }
 };
 
+const getMyVehicles = async (req, res) => {
+  try {
+    const userId = req.user._id || req.user.userId;
+
+    const vehicles = await Vehicle.find({ owner: userId })
+      .populate('owner', 'name');
+
+    res.json({
+      total: vehicles.length,
+      data: vehicles
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const updateVehicle = async (req, res) => {
   try {
     const vehicle = await Vehicle.findById(req.params.id);
@@ -139,5 +156,6 @@ module.exports = {
   getVehicles,
   getVehicleById,
   updateVehicle,
-  deleteVehicle
+  deleteVehicle,
+  getMyVehicles
 };
