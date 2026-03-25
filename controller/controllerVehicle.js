@@ -151,11 +151,33 @@ const deleteVehicle = async (req, res) => {
   }
 };
 
+const markAsSold = async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findById(req.params.id);
+
+    if (!vehicle) return res.status(404).json();
+
+    const userId = req.user._id.toString() || req.user.userId;
+    if (vehicle.owner.toString() !== userId) {
+      return res.status(403).json();
+    }
+
+    vehicle.status = vehicle.status === 'sold' ? 'available' : 'sold';
+    await vehicle.save();
+
+    res.status(200).json({ data: vehicle });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createVehicle,
   getVehicles,
   getVehicleById,
   updateVehicle,
   deleteVehicle,
-  getMyVehicles
+  getMyVehicles,
+  markAsSold
 };

@@ -13,6 +13,7 @@ const upload = require('../middleware/upload');
 router.get('/vehicle', vehicleController.getVehicles);
 
 router.get('/vehicle/me', authenticateToken, vehicleController.getMyVehicles);
+router.patch('/vehicle/:id/sold', authenticateToken, vehicleController.markAsSold);
 router.get('/vehicle/:id', vehicleController.getVehicleById);
 router.patch('/vehicle/:id', authenticateToken, upload.single('image'), vehicleController.updateVehicle);
 router.delete('/vehicle/:id', authenticateToken, vehicleController.deleteVehicle);
