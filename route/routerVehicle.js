@@ -16,7 +16,7 @@ router.get('/vehicle/:id', vehicleController.getVehicleById);
 router.patch('/vehicle/:id', authenticateToken, vehicleController.updateVehicle);
 router.delete('/vehicle/:id', authenticateToken, vehicleController.deleteVehicle);
 
-router.post('/vehicle', upload.single('image'), vehicleController.createVehicle);
+router.post('/vehicle', authenticateToken, upload.single('image'), vehicleController.createVehicle);
 
 router.post('/question/:vehicleId', authenticateToken, controllerQuestion.createQuestion);
 router.get('/question/:vehicleId', authenticateToken, controllerQuestion.getQuestionsByVehicle);
