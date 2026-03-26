@@ -59,11 +59,11 @@ const getQuestionsByVehicle = async (req, res) => {
       return res.status(404).json();
     }
 
-    const userId = req.user.id || req.user.userId;
+    const userId = req.user?.id || req.user?.userId || null;
 
     let filter = { vehicle: vehicleId };
-    if (vehicle.owner.toString() !== userId) {
-      filter.user = userId;
+    if (userId && vehicle.owner && vehicle.owner.toString() !== userId) {
+        filter.user = userId;
     }
 
     const questions = await Question.find(filter)
@@ -80,9 +80,9 @@ const getQuestionsByVehicle = async (req, res) => {
     res.json({
       total: questions.length,
       data: questions.map(q => ({
-                id: q._id,
+                id: q.id,
                 question: q.question,
-                answer: q.answer ? { text: q.answer.answer, user: q.answer.user.name } : null,
+                answer: q.answer ? { text: q.answer.answer, user: q.answer.user.name, createdAt: q.answer.createdAt } : null,
                 user: q.user.name,
                 userId: q.user._id,
                 createdAt: q.createdAt
