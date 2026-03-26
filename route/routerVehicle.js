@@ -8,8 +8,7 @@ const controllerAnswer = require('../controller/controllerAnswer');
 
 const upload = require('../middleware/upload');
 
-
-// RUTAS
+//rutas
 router.get('/vehicle', vehicleController.getVehicles);
 
 router.get('/vehicle/me', authenticateToken, vehicleController.getMyVehicles);
@@ -21,7 +20,7 @@ router.delete('/vehicle/:id', authenticateToken, vehicleController.deleteVehicle
 router.post('/vehicle', authenticateToken, upload.single('image'), vehicleController.createVehicle);
 
 router.post('/question/:vehicleId', authenticateToken, controllerQuestion.createQuestion);
-router.get('/question/:vehicleId', authenticateToken, controllerQuestion.getQuestionsByVehicle);
+router.get('/question/:vehicleId', controllerQuestion.getQuestionsByVehicle);
 router.post('/answer/:questionId', authenticateToken, controllerAnswer.createAnswer);
 
 module.exports = router;
