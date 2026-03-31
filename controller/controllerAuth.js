@@ -3,6 +3,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    throw new Error(message = error.message);
+}
 
 const generateToken = async (req, res) => {
     const { email, password } = req.body;
@@ -12,7 +15,7 @@ const generateToken = async (req, res) => {
     }
 
     try {
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).select('+password');
 
         if (!user) {
             return res.status(401).json();
@@ -25,35 +28,32 @@ const generateToken = async (req, res) => {
         }
 
         const payload = { userId: user._id, email: user.email };
-
         const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
 
-        return res.status(201).json({ token });
+        return res.status(200).json({ token });
     } catch (error) {
         console.error(error);
         return res.status(500).json();
     }
 };
 
-const authenticateToken = async (req, res, next) => {
+const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-        return res.status(401).json({ message: 'Authentication token required' });
+        return res.status(401).json();
     }
 
     try {
 
         const payload = jwt.verify(token, JWT_SECRET);
-
-        const user = await User.findById(payload.userId);
-        req.user = user;
+        req.user = payload;
         next();
     } catch (error) {
                 console.error("JWT ERROR:", error);
 
-        return res.status(403).json({ message: 'Invalid or expired token' });
+        return res.status(403).json();
     }
 };
 
