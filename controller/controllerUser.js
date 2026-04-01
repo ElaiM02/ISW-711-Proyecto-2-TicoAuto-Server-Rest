@@ -13,7 +13,7 @@ const userPost = async (req, res) => {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json();
-        };
+        }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -23,8 +23,7 @@ const userPost = async (req, res) => {
             password: hashedPassword
         });
 
-        res.header('Location', `/users/${newUser._id}`);
-        
+        res.setHeader('Location', `/users/${newUser._id}`);
         return res.status(201).json();
     } catch (error) {
         return res.status(500).json();
@@ -34,14 +33,14 @@ const userPost = async (req, res) => {
 const userGet = async (req, res) => {
     try {
         if (!req.query.id) {
-            const data = await User.find();
+            const data = await User.find().select('-password');
             return res.status(200).json(data)
         }
-        const data = await User.findById(req.query.id);
+        const data = await User.findById(req.query.id).select('-password');
         res.status(200).json(data)
     }
     catch (error) {
-        res.status(500).json({ message: error.message })
+        res.status(500).json();
     }
 };
 
