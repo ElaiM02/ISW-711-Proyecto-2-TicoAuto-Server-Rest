@@ -1,44 +1,29 @@
 const Vehicle = require('../models/vehicle');
+
 const createVehicle = async (req, res) => {
   try {
+    const { brand, model, year, price, description } = req.body;
 
     const vehicleData = {
-      brand: req.body.brand,
-      model: req.body.model,
-      year: req.body.year,
-      price: req.body.price,
-      owner: req.user._id,
-     description: req.body.description,
-      image: req.file ? req.file.filename : null 
+      brand, model, year, price, description,
+      owner: req.user.userId,
+      image: req.file ? req.file.filename : null
     };
 
     const vehicle = await Vehicle.create(vehicleData);
 
-    res.status(201).json({
-      data: vehicle
-    });
+    res.status(201).json({data: vehicle});
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json();
   }
 };
 
 const getVehicles = async (req, res) => {
   try {
-    const {
-      brand,
-      model,
-      minYear,
-      maxYear,
-      minPrice,
-      maxPrice,
-      status,
-      page = 1,
-      limit = 10
-    } = req.query;
+        const { brand, model, minYear, maxYear, minPrice, maxPrice, status, page = 1, limit = 10 } = req.query;
 
     const filter = {};
-
     if (brand) filter.brand = brand;
     if (model) filter.model = model;
     if (status) filter.status = status;
@@ -55,12 +40,14 @@ const getVehicles = async (req, res) => {
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    const vehicles = await Vehicle.find(filter)
-      .skip((page - 1) * limit)
-      .limit(Number(limit))
-      .populate('owner', 'name');
-
-    const total = await Vehicle.countDocuments(filter);
+    const [vehicles, total] = await Promise.all([
+      Vehicle.find(filter)
+        .select('brand model year price status image owner')
+        .skip((page - 1) * limit)
+        .limit(Number(limit))
+        .populate('owner', 'name'),
+      Vehicle.countDocuments(filter)
+    ]);
 
     res.json({
       total,
@@ -70,41 +57,31 @@ const getVehicles = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json();
   }
 };
 
 const getVehicleById = async (req, res) => {
   try {
+    const vehicle = await Vehicle.findById(req.params.id).populate('owner', 'name');
 
-    const vehicle = await Vehicle.findById(req.params.id)
-      .populate('owner', 'name');
-
-    if (!vehicle) {
-      return res.status(404).json();
-    }
+    if (!vehicle) return res.status(404).json();
 
     res.json(vehicle);
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json();
   }
 };
 
 const getMyVehicles = async (req, res) => {
   try {
-    const userId = req.user._id || req.user.userId;
+    const vehicles = await Vehicle.find({ owner: req.user.userId }).populate('owner', 'name');
 
-    const vehicles = await Vehicle.find({ owner: userId })
-      .populate('owner', 'name');
-
-    res.json({
-      total: vehicles.length,
-      data: vehicles
-    });
+    res.json({ total: vehicles.length, data: vehicles });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json();
   }
 };
 
@@ -114,21 +91,14 @@ const updateVehicle = async (req, res) => {
 
     if (!vehicle) return res.status(404).json();
 
-    const userId = req.user.id || req.user._id.toString();
-    if (vehicle.owner.toString() !== userId) {
-      return res.status(403).json();
-    }
+    if (vehicle.owner.toString() !== req.user.userId) return res.status(403).json();
 
-    const updated = await Vehicle.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const updated = await Vehicle.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
 
     res.status(200).json(updated);
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json();
   }
 };
 
@@ -137,17 +107,13 @@ const deleteVehicle = async (req, res) => {
     const vehicle = await Vehicle.findById(req.params.id);
 
     if (!vehicle) return res.status(404).json();
-
-    const userId = req.user.id || req.user._id.toString();
-    if (vehicle.owner.toString() !== userId) {
-      return res.status(403).json();
-    }
+    if (vehicle.owner.toString() !== req.user.userId) return res.status(403).json();
 
     await Vehicle.findByIdAndDelete(req.params.id);
     res.status(204).send();
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json();
   }
 };
 
@@ -157,10 +123,7 @@ const markAsSold = async (req, res) => {
 
     if (!vehicle) return res.status(404).json();
 
-    const userId = req.user._id.toString() || req.user.userId;
-    if (vehicle.owner.toString() !== userId) {
-      return res.status(403).json();
-    }
+    if (vehicle.owner.toString() !== req.user.userId) return res.status(403).json();
 
     vehicle.status = vehicle.status === 'sold' ? 'available' : 'sold';
     await vehicle.save();
@@ -168,7 +131,7 @@ const markAsSold = async (req, res) => {
     res.status(200).json({ data: vehicle });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json();
   }
 };
 
