@@ -42,7 +42,7 @@ const getVehicles = async (req, res) => {
 
     const [vehicles, total] = await Promise.all([
       Vehicle.find(filter)
-        .select('brand model year price status image owner')
+        .select('brand model year price status image owner description')
         .skip((page - 1) * limit)
         .limit(Number(limit))
         .populate('owner', 'name'),
