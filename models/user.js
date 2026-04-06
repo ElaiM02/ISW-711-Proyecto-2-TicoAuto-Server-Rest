@@ -16,6 +16,20 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    cedula: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
+    first_lastname: {
+        type: String,
+        required: true,
+    },
+    second_lastname: {
+        type: String,
+        required: true,
+    }
 }, {
     timestamps: true
 });
