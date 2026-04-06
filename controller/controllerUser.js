@@ -1,16 +1,25 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 
+const PADRON_API = 'http://127.0.0.1:8000';
+
 const userPost = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, cedula} = req.body;
 
-
-        if (!name || !email || !password) {
+        if (!name || !email || !password || !cedula) {
             return res.status(400).json();
         }
 
-        const existingUser = await User.findOne({ email });
+        const padronResponse = await fetch(`${PADRON_API}/padron/cedula/${cedula}`);
+
+        if (!padronResponse.ok) {
+            return res.status(400).json();
+        }
+
+        const person = await padronResponse.json();
+
+        const existingUser = await User.findOne({ $or: [{ email }, { cedula }] });
         if (existingUser) {
             return res.status(400).json();
         }
@@ -20,7 +29,10 @@ const userPost = async (req, res) => {
         const newUser = await User.create({
             name,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            cedula,
+            first_lastname: person.first_lastname,
+            second_lastname: person.second_lastname
         });
 
         res.setHeader('Location', `/users/${newUser._id}`);
