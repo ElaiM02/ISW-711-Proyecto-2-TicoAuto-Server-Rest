@@ -21,6 +21,10 @@ const generateToken = async (req, res) => {
             return res.status(401).json();
         }
 
+        if (user.status === 'pending') {
+            return res.status(403).json();
+        }
+
         const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordMatch) {
