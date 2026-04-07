@@ -29,6 +29,15 @@ const userSchema = new mongoose.Schema({
     second_lastname: {
         type: String,
         required: true,
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'active'],
+        default: 'pending'
+    },
+    verificationToken: {
+        type: String,
+        default: null
     }
 }, {
     timestamps: true
