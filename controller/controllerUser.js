@@ -55,7 +55,7 @@ const userPost = async (req, res) => {
 
         const existingUser = await User.findOne({ $or: [{ email }, { cedula }] });
         if (existingUser) {
-            return res.status(400).json();
+            return res.status(409).json();
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
