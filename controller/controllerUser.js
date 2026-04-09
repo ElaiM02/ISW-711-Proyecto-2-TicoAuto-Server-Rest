@@ -122,8 +122,48 @@ const userGet = async (req, res) => {
     }
 };
 
+const googleCedula = async (req, res) => {
+    try {
+        const { cedula } = req.body;
+        const userId = req.user.userId;
+
+        if (!cedula) {
+            return res.status(400).json();
+        }
+
+        // Verificar que la cédula no esté ya registrada
+        const existingCedula = await User.findOne({ cedula });
+        if (existingCedula) {
+            return res.status(409).json();
+        }
+
+        // Consultar el padrón
+        const padronResponse = await fetch(`${PADRON_API}/padron/cedula/${cedula}`);
+        if (!padronResponse.ok) {
+            return res.status(400).json();
+        }
+
+        const person = await padronResponse.json();
+
+        // Actualizar el usuario
+        await User.findByIdAndUpdate(userId, {
+            cedula,
+            first_lastname: person.primer_apellido,
+            second_lastname: person.segundo_apellido,
+            status: 'active'
+        });
+
+        return res.status(200).json();
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json();
+    }
+};
+
 module.exports = {
     userPost,
     userVerify,
-    userGet
+    userGet,
+    googleCedula
 };
