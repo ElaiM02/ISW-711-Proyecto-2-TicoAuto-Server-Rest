@@ -18,24 +18,29 @@ const userSchema = new mongoose.Schema({
     },
     cedula: {
         type: String,
-        required: true,
+        default: 'null',
         unique: true,
         trim: true
     },
     first_lastname: {
         type: String,
-        required: true,
+        default: 'null',
+
     },
     second_lastname: {
         type: String,
-        required: true,
+        default: 'null'
     },
     status: {
         type: String,
-        enum: ['pending', 'active'],
+        enum: ['pending', 'active', 'pending_cedula'],
         default: 'pending'
     },
     verificationToken: {
+        type: String,
+        default: null
+        },
+    googleId: {
         type: String,
         default: null
     }
