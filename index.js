@@ -8,6 +8,8 @@ const cors = require("cors");
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const session = require('express-session');
+const passport = require('./config/passport');
 
 const { generateToken } = require('./controller/controllerAuth');
 
@@ -22,8 +24,15 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cors({ origin: '*', methods: '*' }));
 app.use('/uploads', express.static('uploads'));
 
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
+}));
+
 //auth route
 app.post('/auth/token', generateToken);
+app.use('/auth', require('./route/routerAuth'));
 
 //route
 app.use('/api', require('./route/routerUser'));
