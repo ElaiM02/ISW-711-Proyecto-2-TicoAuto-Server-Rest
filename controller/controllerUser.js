@@ -1,23 +1,16 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const crypto = require('crypto');
 
 const PADRON_API = 'http://127.0.0.1:8000';
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
-
 const sendVerificationEmail = async (email, token) => {
     const verificationUrl = `${process.env.FRONTEND_URL}/verify.html?token=${token}`;
 
-    await transporter.sendMail({
-        from: `"TicoAuto" <${process.env.EMAIL_USER}>`,
+    const result = await sgMail.send({
+        from: 'eliamestudio@gmail.com',
         to: email,
         subject: 'Verifica tu cuenta - TicoAuto',
         html: `
@@ -35,6 +28,8 @@ const sendVerificationEmail = async (email, token) => {
             <p>Si no creaste esta cuenta, ignora este correo.</p>
         `
     });
+
+    console.log('SendGrid result:', result[0].statusCode);
 };
 
 const userPost = async (req, res) => {
@@ -131,13 +126,11 @@ const googleCedula = async (req, res) => {
             return res.status(400).json();
         }
 
-        // Verificar que la cédula no esté ya registrada
         const existingCedula = await User.findOne({ cedula });
         if (existingCedula) {
             return res.status(409).json();
         }
 
-        // Consultar el padrón
         const padronResponse = await fetch(`${PADRON_API}/padron/cedula/${cedula}`);
         if (!padronResponse.ok) {
             return res.status(400).json();
@@ -145,7 +138,6 @@ const googleCedula = async (req, res) => {
 
         const person = await padronResponse.json();
 
-        // Actualizar el usuario
         await User.findByIdAndUpdate(userId, {
             cedula,
             first_lastname: person.primer_apellido,
