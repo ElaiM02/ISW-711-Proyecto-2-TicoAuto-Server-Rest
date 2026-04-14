@@ -6,6 +6,34 @@ const crypto = require('crypto');
 
 const PADRON_API = 'http://127.0.0.1:8000';
 
+const validarCedula = async (req, res) => {
+    try {
+        const { cedula } = req.params;
+
+        if (!cedula || cedula.length !== 9 || !cedula.match(/^\d+$/)) {
+            return res.status(400).json();
+        }
+
+        const padronResponse = await fetch(`${PADRON_API}/padron/cedula/${cedula}`);
+
+        if (!padronResponse.ok) {
+            return res.status(404).json();
+        }
+
+        const person = await padronResponse.json();
+
+        return res.status(200).json({
+            nombre: person.nombre,
+            primer_apellido: person.primer_apellido,
+            segundo_apellido: person.segundo_apellido
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json();
+    }
+};
+
 const sendVerificationEmail = async (email, token) => {
     const verificationUrl = `${process.env.FRONTEND_URL}/verify.html?token=${token}`;
 
@@ -157,5 +185,6 @@ module.exports = {
     userPost,
     userVerify,
     userGet,
-    googleCedula
+    googleCedula,
+    validarCedula
 };
