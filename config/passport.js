@@ -20,7 +20,7 @@ passport.use(new GoogleStrategy({
                 cedula: null,
                 first_lastname: '',
                 second_lastname: '',
-                status: 'active',
+                status: 'pending_cedula',
                 googleId: profile.id
             });
         }

@@ -15,6 +15,11 @@ router.get('/google/callback',
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
+
+        if (user.status === 'pending_cedula') {
+            return res.redirect(`${process.env.FRONTEND_URL}/google-cedula.html?token=${token}`);
+        }
+
         return res.redirect(`${process.env.FRONTEND_URL}/google-callback.html?token=${token}`);
     }
 );

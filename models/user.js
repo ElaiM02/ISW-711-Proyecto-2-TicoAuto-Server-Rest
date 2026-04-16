@@ -18,8 +18,9 @@ const userSchema = new mongoose.Schema({
     },
     cedula: {
         type: String,
-        default: 'null',
+        default: null,
         unique: true,
+        sparse: true,
         trim: true
     },
     first_lastname: {
