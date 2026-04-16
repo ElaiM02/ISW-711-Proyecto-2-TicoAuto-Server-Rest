@@ -11,7 +11,7 @@ const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const passport = require('./config/passport');
 
-const { generateToken } = require('./controller/controllerAuth');
+const { generateToken, verify2FA } = require('./controller/controllerAuth');
 
 const app = express();
 
@@ -33,6 +33,7 @@ app.use(session({
 //auth route
 app.post('/auth/token', generateToken);
 app.use('/auth', require('./route/routerAuth'));
+app.post('/auth/2fa', verify2FA);
 
 //route
 app.use('/api', require('./route/routerUser'));
