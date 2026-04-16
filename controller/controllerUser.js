@@ -62,9 +62,10 @@ const sendVerificationEmail = async (email, token) => {
 
 const userPost = async (req, res) => {
     try {
-        const { name, email, password, cedula} = req.body;
+        const { name, email, password, cedula, phone} = req.body;
+        console.log('Datos recibidos:', { name, email, cedula, phone });
 
-        if (!name || !email || !password || !cedula) {
+        if (!name || !email || !password || !cedula || !phone) {
             return res.status(400).json();
         }
 
@@ -89,6 +90,7 @@ const userPost = async (req, res) => {
             email,
             password: hashedPassword,
             cedula,
+            phone,
             first_lastname: person.primer_apellido,
             second_lastname: person.segundo_apellido,
             status: 'pending',
