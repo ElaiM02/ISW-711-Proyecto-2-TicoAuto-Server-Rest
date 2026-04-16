@@ -43,6 +43,18 @@ const userSchema = new mongoose.Schema({
     googleId: {
         type: String,
         default: null
+    },
+    phone: {
+        type: String,
+        default: null,
+    },
+    twoFactorCode: {
+        type: String,
+        default: null
+    },
+    twoFactorExpiration: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true
