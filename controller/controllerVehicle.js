@@ -24,8 +24,8 @@ const getVehicles = async (req, res) => {
         const { brand, model, minYear, maxYear, minPrice, maxPrice, status, page = 1, limit = 10 } = req.query;
 
     const filter = {};
-    if (brand) filter.brand = brand;
-    if (model) filter.model = model;
+    if (brand) filter.brand = { $regex: brand, $options: 'i' };
+    if (model) filter.model = { $regex: model, $options: 'i' };
     if (status) filter.status = status;
 
     if (minYear || maxYear) {
