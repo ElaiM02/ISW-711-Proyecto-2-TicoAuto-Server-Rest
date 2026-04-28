@@ -7,7 +7,6 @@ const express = require('express');
 const cors = require("cors");
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const passport = require('./config/passport');
 
@@ -16,12 +15,15 @@ const { generateToken, verify2FA } = require('./controller/controllerAuth');
 const app = express();
 
 app.use(helmet({crossOriginResourcePolicy: { policy: "cross-origin" }}));
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 
 //middlewares
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
-app.use(cors({ origin: '*', methods: '*' }));
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use('/uploads', express.static('uploads'));
 
 app.use(session({

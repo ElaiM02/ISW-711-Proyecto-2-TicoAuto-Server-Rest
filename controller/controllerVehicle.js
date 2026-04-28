@@ -21,7 +21,7 @@ const createVehicle = async (req, res) => {
 
 const getVehicles = async (req, res) => {
   try {
-        const { brand, model, minYear, maxYear, minPrice, maxPrice, status, page = 1, limit = 10 } = req.query;
+        const { brand, model, minYear, maxYear, minPrice, maxPrice, status } = req.query;
 
     const filter = {};
     if (brand) filter.brand = { $regex: brand, $options: 'i' };
@@ -40,19 +40,13 @@ const getVehicles = async (req, res) => {
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    const [vehicles, total] = await Promise.all([
-      Vehicle.find(filter)
-        .select('brand model year price status image owner description')
-        .skip((page - 1) * limit)
-        .limit(Number(limit))
-        .populate('owner', 'name'),
-      Vehicle.countDocuments(filter)
-    ]);
+    const vehicles = await Vehicle.find(filter)
+      .select('brand model year price status image owner description')
+      .sort({ createdAt: -1 })
+      .populate('owner', 'name');
 
     res.json({
-      total,
-      page: Number(page),
-      totalPages: Math.ceil(total / limit),
+      total: vehicles.length,
       data: vehicles
     });
 
@@ -93,7 +87,7 @@ const updateVehicle = async (req, res) => {
 
     if (vehicle.owner.toString() !== req.user.userId) return res.status(403).json();
 
-    const updated = await Vehicle.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const updated = await Vehicle.findByIdAndUpdate(req.params.id, req.body, { returnDocument: 'after', runValidators: true });
 
     res.status(200).json(updated);
 
