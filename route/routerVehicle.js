@@ -8,19 +8,20 @@ const controllerAnswer = require('../controller/controllerAnswer');
 
 const upload = require('../middleware/upload');
 
-//rutas
-router.get('/vehicle', vehicleController.getVehicles);
+// Vehicles
+router.get('/vehicles', vehicleController.getVehicles);
+router.get('/vehicles/me', authenticateToken, vehicleController.getMyVehicles);
+router.patch('/vehicles/:id/sold', authenticateToken, vehicleController.markAsSold);
+router.get('/vehicles/:id', vehicleController.getVehicleById);
+router.patch('/vehicles/:id', authenticateToken, upload.single('image'), vehicleController.updateVehicle);
+router.delete('/vehicles/:id', authenticateToken, vehicleController.deleteVehicle);
+router.post('/vehicles', authenticateToken, upload.single('image'), vehicleController.createVehicle);
 
-router.get('/vehicle/me', authenticateToken, vehicleController.getMyVehicles);
-router.patch('/vehicle/:id/sold', authenticateToken, vehicleController.markAsSold);
-router.get('/vehicle/:id', vehicleController.getVehicleById);
-router.patch('/vehicle/:id', authenticateToken, upload.single('image'), vehicleController.updateVehicle);
-router.delete('/vehicle/:id', authenticateToken, vehicleController.deleteVehicle);
+// Questions
+router.post('/vehicles/:vehicleId/questions', authenticateToken, controllerQuestion.createQuestion);
+router.get('/vehicles/:vehicleId/questions', authenticateToken, controllerQuestion.getQuestionsByVehicle);
 
-router.post('/vehicle', authenticateToken, upload.single('image'), vehicleController.createVehicle);
-
-router.post('/question/:vehicleId', authenticateToken, controllerQuestion.createQuestion);
-router.get('/question/:vehicleId', authenticateToken, controllerQuestion.getQuestionsByVehicle);
-router.post('/answer/:questionId', authenticateToken, controllerAnswer.createAnswer);
+// Answers
+router.post('/questions/:questionId/answers', authenticateToken, controllerAnswer.createAnswer);
 
 module.exports = router;
