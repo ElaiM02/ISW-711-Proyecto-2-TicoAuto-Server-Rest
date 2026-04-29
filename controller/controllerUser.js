@@ -169,6 +169,7 @@ const googleCedula = async (req, res) => {
         const person = await padronResponse.json();
 
         await User.findByIdAndUpdate(userId, {
+            name: person.nombre,
             cedula,
             first_lastname: person.primer_apellido,
             second_lastname: person.segundo_apellido,

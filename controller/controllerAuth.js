@@ -9,6 +9,7 @@ if (!JWT_SECRET) {
 }
 
 const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+const IS_TEST_MODE = process.env.TWILIO_TEST_MODE === 'true';
 
 const generateToken = async (req, res) => {
     const { email, password } = req.body;
@@ -34,17 +35,22 @@ const generateToken = async (req, res) => {
             return res.status(401).json();
         }
 
-         const code = Math.floor(100000 + Math.random() * 900000).toString();
-        const expires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const expires = new Date(Date.now() + 5 * 60 * 1000);
 
         user.twoFactorCode = code;
         user.twoFactorExpiration = expires;
         await user.save();
 
+        // Si está en modo prueba usa el número de prueba, de lo contrario usa el número real del usuario
+        const toPhone = IS_TEST_MODE
+            ? process.env.TWILIO_TEST_PHONE_NUMBER
+            : user.phone;
+
         await twilioClient.messages.create({
             body: `Tu código de verificación de TicoAuto es: ${code}`,
             from: process.env.TWILIO_PHONE_NUMBER,
-            to: user.phone
+            to: toPhone
         });
 
         return res.status(200).json({ requires2FA: true });
